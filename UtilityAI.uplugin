@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "UtilityAI",
+	"Description": "An implementation of a \"utility AI\" system, using weights to tell AI which tasks to do instead of a traditional behavior tree.",
+	"Category": "Other",
+	"CreatedBy": "Jay Stevens",
+	"CreatedByURL": "https://github.com/Jay2645/UnrealUtilityAI",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UtilityAI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
