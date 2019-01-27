@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UnrealString.h"
+#include "AIController.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/DataAsset.h"
-#include "GameFramework/Controller.h"
 #include "GameplayTagContainer.h"
 
 #include "Decision.h"
@@ -21,7 +21,7 @@ struct UTILITYAI_API FDecisionContext
 public:
 	// The controller which is generating our considerations.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AController* OurController;
+	AAIController* OurController;
 	// The actor which we are currently "thinking about."
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* OurTarget;

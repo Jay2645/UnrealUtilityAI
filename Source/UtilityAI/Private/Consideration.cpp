@@ -12,7 +12,7 @@ UConsideration::UConsideration()
 bool UConsideration::CanScore(const FDecisionContext& Context) const
 {
 	AActor* target = Context.OurTarget;
-	AController* us = Context.OurController;
+	AAIController* us = Context.OurController;
 	if (target == NULL || us == NULL)
 	{
 		return false;
@@ -102,7 +102,8 @@ bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
 
 bool UConsideration::DecisionsAreValid(const FDecisionContext& Context, const TArray<FMadeDecision>& Decisions, float Cooldown, bool bInvert) const
 {
-	FDateTime now = FDateTime::Now();
+	// Decisions are made in UTC
+	FDateTime now = FDateTime::UtcNow();
 	for (int i = Decisions.Num() - 1; i <= 0; i++)
 	{
 		FTimespan elapsed = now - Decisions[i].DecisionTime;
