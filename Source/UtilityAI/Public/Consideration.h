@@ -7,6 +7,10 @@
 #include "Curves/CurveFloat.h"
 #include "Engine/DataAsset.h"
 #include "GameFramework/Controller.h"
+#include "GameplayTagContainer.h"
+
+#include "Decision.h"
+
 #include "Consideration.generated.h"
 
 USTRUCT(BlueprintType)
@@ -21,6 +25,30 @@ public:
 	// The actor which we are currently "thinking about."
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* OurTarget;
+	// The decision that we'll make if we succeed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	const UDecision* Decision;
+};
+
+
+USTRUCT(BlueprintType)
+struct UTILITYAI_API FCooldownDecisionContext
+{
+	GENERATED_BODY()
+
+public:
+	// The Decision that the Consideration should check.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	const UDecision* Decision;
+	// How long we should wait until after the given action before
+	// this context can be valid again.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (MinValue = "0.1"))
+	float Cooldown;
+	// If this is set to true, then this context is only valid during
+	// the given time period (instead of only valid once the time
+	// period has elapsed).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bInvert;
 };
 
 /**
@@ -42,16 +70,62 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* ResponseCurve;
 
+	// Only run this consideration if the target is within a certain
+	// radius of our controller.
+	// A value of <= 0 disables the radius check.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Radius;
+
+	// How long before this Consideration can run again after it succeeds.
+	// A value of <= 0 disables cooldown check.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CooldownTime;
+	// Whether we should invert the cooldown timer.
+	// Note that if you enable this, you should make sure that any Decisions
+	// associated with this Consideration can be called somewhere else.
+	// Otherwise, they'll never get called!
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bInvertCooldown;
+
+	// All tags that need to be on the pawn associated with the controller which is
+	// calling the score function for it to consider returning a value.
+	// Skipped if the pawn doesn't implement IGameplayTagAssetInterface.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer OurRequiredTags;
+
+	// All tags that need to be on the controller calling the score function for it to
+	// consider returning a value.
+	// Skipped if the target doesn't implement IGameplayTagAssetInterface.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer TargetRequiredTags;
+
+	// We check to see if the pawn has performed any of these decisions within the specified
+	// time period. If we've performed one of these decisions recently, then we skip this
+	// consideration. An empty array means we won't check anything.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FCooldownDecisionContext> CooldownDecisions;
+
 public:
 	UConsideration();
+
+private:
+	bool CanScore(const FDecisionContext& Context) const;
+
+	bool CooldownIsValid(const FDecisionContext& Context) const;
+
+	bool DecisionsAreValid(const FDecisionContext& Context, const TArray<FMadeDecision>& Decisions, float Cooldown, bool bInvert) const;
 
 protected:
 	virtual float Score_Implementation(const FDecisionContext& Context) const;
 
-public:
 	// The heart of the Consideration.
 	// Returns a multiplier which gives data about how likely it is that an AI should
-	// choose this action. 
+	// choose this action.
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Consideration")
 	float Score(const FDecisionContext& Context) const;
+
+public: 
+	// Calculates a score for this Consideration given a context.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Consideration")
+	float CalculateScore(const FDecisionContext& Context) const;
 };
