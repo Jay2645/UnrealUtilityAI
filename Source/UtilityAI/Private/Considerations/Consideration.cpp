@@ -13,7 +13,46 @@ bool UConsideration::CanScore(const FDecisionContext& Context) const
 {
 	AActor* target = Context.OurTarget;
 	AAIController* us = Context.OurController;
-	if (target == NULL || us == NULL)
+	if (!HasAllRequiredGameplayTags(target, us))
+	{
+		return false;
+	}
+
+	if (!IsInRange(target, us))
+	{
+		return false;
+	}
+
+
+	return CooldownIsValid(Context);
+}
+
+bool UConsideration::IsInRange(AActor* Target, AAIController* Us) const
+{
+	if (Radius <= 0.0f)
+	{
+		return true;
+	}
+
+	if (Target == NULL || Us == NULL)
+	{
+		return false;
+	}
+
+	APawn* ourPawn = Us->GetPawn();
+	if (ourPawn == NULL)
+	{
+		return false;
+	}
+
+	FVector ourLocation = ourPawn->GetActorLocation();
+	FVector targetLocation = Target->GetActorLocation();
+	return FVector::DistSquared(targetLocation, ourLocation) <= Radius * Radius;
+}
+
+bool UConsideration::HasAllRequiredGameplayTags(AActor* Target, AAIController* Us) const
+{
+	if (Target == NULL || Us == NULL)
 	{
 		return false;
 	}
@@ -21,7 +60,7 @@ bool UConsideration::CanScore(const FDecisionContext& Context) const
 	// Target gameplay tags
 	if (TargetRequiredTags.Num() > 0)
 	{
-		IGameplayTagAssetInterface* targetInterface = Cast<IGameplayTagAssetInterface>(target);
+		IGameplayTagAssetInterface* targetInterface = Cast<IGameplayTagAssetInterface>(Target);
 		if (targetInterface != NULL)
 		{
 			if (!targetInterface->HasAllMatchingGameplayTags(TargetRequiredTags))
@@ -34,7 +73,7 @@ bool UConsideration::CanScore(const FDecisionContext& Context) const
 	// Our gameplay tags
 	if (OurRequiredTags.Num() > 0)
 	{
-		IGameplayTagAssetInterface* ourInterface = Cast<IGameplayTagAssetInterface>(us->GetPawn());
+		IGameplayTagAssetInterface* ourInterface = Cast<IGameplayTagAssetInterface>(Us->GetPawn());
 		if (ourInterface != NULL)
 		{
 			if (!ourInterface->HasAllMatchingGameplayTags(OurRequiredTags))
@@ -44,7 +83,7 @@ bool UConsideration::CanScore(const FDecisionContext& Context) const
 		}
 	}
 
-	return CooldownIsValid(Context);
+	return true;
 }
 
 bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
@@ -107,6 +146,9 @@ bool UConsideration::DecisionsAreValid(const FDecisionContext& Context, const TA
 	for (int i = Decisions.Num() - 1; i <= 0; i++)
 	{
 		FTimespan elapsed = now - Decisions[i].DecisionTime;
+		// All decisions are made with the earliest first
+		// This means as soon as we exceed the cooldown period for one decision,
+		// we've exceeded the cooldown period for all decisions
 		if (elapsed.GetSeconds() > Cooldown)
 		{
 			// We've processed everything we care about without hitting 
@@ -118,6 +160,8 @@ bool UConsideration::DecisionsAreValid(const FDecisionContext& Context, const TA
 			}
 			break;
 		}
+
+		// We're within the cooldown period for this decision
 		if (Decisions[i].Decision == Context.Decision)
 		{
 			// We've made this decision recently

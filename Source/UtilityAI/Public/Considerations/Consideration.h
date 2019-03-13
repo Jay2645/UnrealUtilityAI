@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,10 +7,15 @@
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
 
-#include "Decision.h"
+#include "DecisionBase.h"
 
 #include "Consideration.generated.h"
 
+/*
+* A context that gets passed in giving real-world data about a decision.
+* This passes in the AI making the decision, the decision we're trying
+* to make, as well as the actor we're acting towards.
+*/
 USTRUCT(BlueprintType)
 struct UTILITYAI_API FDecisionContext
 {
@@ -20,17 +23,23 @@ struct UTILITYAI_API FDecisionContext
 
 public:
 	// The controller which is generating our considerations.
+	// i.e. "Who is asking?"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AAIController* OurController;
 	// The actor which we are currently "thinking about."
+	// i.e. "What are you going to do the action to?"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* OurTarget;
 	// The decision that we'll make if we succeed.
+	// i.e. "What are you trying to do?"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	const UDecision* Decision;
+	const UDecisionBase* Decision;
 };
 
 
+/*
+* A context that checks if we have make a decision recently.
+*/
 USTRUCT(BlueprintType)
 struct UTILITYAI_API FCooldownDecisionContext
 {
@@ -39,7 +48,7 @@ struct UTILITYAI_API FCooldownDecisionContext
 public:
 	// The Decision that the Consideration should check.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	const UDecision* Decision;
+	const UDecisionBase* Decision;
 	// How long we should wait until after the given action before
 	// this context can be valid again.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (MinValue = "0.1"))
@@ -56,8 +65,9 @@ public:
  * Examples of possible considerations could be "how much health do I have?"
  * It takes context about what is going on inside the game and uses that to
  * provide a score, which gets used as a multiplier when making choices.
+ * This score is normalized between 0 and 1.
  */
-UCLASS(Blueprintable)
+UCLASS(Abstract, Blueprintable)
 class UTILITYAI_API UConsideration : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
@@ -70,8 +80,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* ResponseCurve;
 
-	// Only run this consideration if the target is within a certain
-	// radius of our controller.
+	// Only run this consideration if the target is within a certain radius of our controller.
 	// A value of <= 0 disables the radius check.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius;
@@ -110,9 +119,9 @@ public:
 
 private:
 	bool CanScore(const FDecisionContext& Context) const;
-
+	bool IsInRange(AActor* Target, AAIController* Us) const;
+	bool HasAllRequiredGameplayTags(AActor* target, AAIController* us) const;
 	bool CooldownIsValid(const FDecisionContext& Context) const;
-
 	bool DecisionsAreValid(const FDecisionContext& Context, const TArray<FMadeDecision>& Decisions, float Cooldown, bool bInvert) const;
 
 protected:

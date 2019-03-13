@@ -1,8 +1,8 @@
 
 
-#include "Decision.h"
+#include "DecisionBase.h"
 
-FMadeDecision UDecision::RunDecision_Implementation(AAIController* RunningController) const
+FMadeDecision UDecisionBase::RunDecision_Implementation(AAIController* RunningController) const
 {
 	FMadeDecision decision;
 	decision.Decision = this;

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 
-#include "Decision.h"
+#include "DecisionBase.h"
 
 #include "UtilityAIInterface.generated.h"
 

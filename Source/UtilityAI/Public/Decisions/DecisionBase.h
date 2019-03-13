@@ -8,9 +8,9 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardData.h"
 
-#include "Decision.generated.h"
+#include "DecisionBase.generated.h"
 
-class UDecision;
+class UDecisionBase;
 
 /**
 * A struct representing a decision that we've made,
@@ -24,17 +24,20 @@ struct UTILITYAI_API FMadeDecision
 public:
 	// The Decision that we've made.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	const UDecision* Decision;
+	const UDecisionBase* Decision;
 	// What time we made this decision (in UTC time).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDateTime DecisionTime;
 };
 
 /**
- * 
+ * This implements the actual AI code.
+ * Each time this decision gets selected, `RunDecision` gets called to execute
+ * any AI code. Note that the AI may not choose this decision next frame, so 
+ * any actions should be atomic, or at least not matter frame-to-frame.
  */
-UCLASS(Blueprintable)
-class UTILITYAI_API UDecision : public UPrimaryDataAsset
+UCLASS(Abstract, Blueprintable)
+class UTILITYAI_API UDecisionBase : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
