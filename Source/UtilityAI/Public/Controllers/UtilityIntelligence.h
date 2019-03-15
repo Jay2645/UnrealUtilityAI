@@ -23,6 +23,10 @@ private:
 	UPROPERTY()
 	FTimerHandle DecisionTickTimer;
 
+	UPROPERTY(Transient)
+	UBlackboardComponent* AIBlackboard;
+	
+
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FMadeDecision> RecentDecisions;
@@ -51,11 +55,16 @@ private:
 	FDecisionContext GetDecisionContext() const;
 
 protected:
-	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual TArray<FMadeDecision> GetRecentDecisions_Implementation() const override;
 
 public:
 	UFUNCTION(BlueprintCallable)
 	void MakeDecision(const UDecisionBase* Decision);
+
+	UFUNCTION(BlueprintCallable)
+	void StartAI(AAIController* Controller, UBlackboardComponent* Blackboard);
+	UFUNCTION(BlueprintCallable)
+	void StopAI();
+
 };
