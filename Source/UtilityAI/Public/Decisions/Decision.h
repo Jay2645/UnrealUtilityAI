@@ -22,6 +22,8 @@ public:
 	const UNonSkillDecisionScoreEvaluator* DecisionScoreEvaluator;
 
 public:
+	// Calculates the score for this decision.
+	// By default, just returns the output of the DecisionScoreEvaluator, if one is hooked up.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Score")
-	float CalculateScore(FDecisionContext Context, float MinToBeat);
+	float CalculateScore(FDecisionContext& Context, float MinToBeat, float Bonus = 0.0f) const;
 };

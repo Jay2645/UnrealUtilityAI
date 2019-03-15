@@ -47,20 +47,38 @@ float UDecisionScoreEvaluator::GetCompensationFactor(float Score, float Bonus) c
 
 float UDecisionScoreEvaluator::GetWeight() const
 {
-	return (float)Priority + Weight;
+	return (float)Priority * Weight;
 }
 
-float UDecisionScoreEvaluator::CalculateScore(FDecisionContext Context, float MinToBeat, float Bonus) const
+float UDecisionScoreEvaluator::CalculateScore_Implementation(FDecisionContext& Context, float MinToBeat, float Bonus) const
 {
 	float startingBonus = GetWeight() + GetMomentum(Context) + Bonus;
 	float score = startingBonus;
 	for (const UConsideration* consideration : Considerations)
 	{
 		score *= FMath::Clamp(consideration->CalculateScore(Context), 0.0f, 1.0f);
-		if (score < 0.0f || score < MinToBeat)
+		if (score == 0.0f || score < MinToBeat)
 		{
 			break;
 		}
 	}
 	return GetCompensationFactor(score, startingBonus);
+}
+
+void UDecisionScoreEvaluator::FindBestContext(TArray<FDecisionContext>& Contexts, const UDecisionScoreEvaluator* Evaluator, FDecisionContext& OutContext, float& OutBestScore)
+{
+	if (Evaluator == NULL)
+	{
+		return;
+	}
+
+	for (FDecisionContext& context : Contexts)
+	{
+		float score = Evaluator->CalculateScore(context, OutBestScore);
+		if (score > OutBestScore)
+		{
+			OutBestScore = score;
+			OutContext = context;
+		}
+	}
 }

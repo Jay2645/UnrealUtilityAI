@@ -40,6 +40,7 @@ public class UtilityAI : ModuleRules
 				"SlateCore",
 				"GameplayTags",
 				"AIModule",
+				"NavigationSystem",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

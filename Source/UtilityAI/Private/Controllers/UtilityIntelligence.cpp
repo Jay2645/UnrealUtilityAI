@@ -2,6 +2,7 @@
 
 
 #include "UtilityIntelligence.h"
+#include "AISystem.h"
 
 // Sets default values for this component's properties
 UUtilityIntelligence::UUtilityIntelligence()
@@ -9,61 +10,74 @@ UUtilityIntelligence::UUtilityIntelligence()
 	PrimaryComponentTick.bCanEverTick = false;
 	SkillTick = 0.05f;
 	DecisionTick = 0.125f;
+
+	ContextTarget = NULL;
+
+	AcceptableRadius = GET_AI_CONFIG_VAR(AcceptanceRadius);
+	bReachTestIncludesGoalRadius = bReachTestIncludesAgentRadius = GET_AI_CONFIG_VAR(bFinishMoveOnGoalOverlap);
+	bAllowStrafe = GET_AI_CONFIG_VAR(bAllowStrafing);
+	bAllowPartialPath = GET_AI_CONFIG_VAR(bAcceptPartialPaths);
+	bTrackMovingGoal = true;
+	bProjectGoalLocation = true;
+	bUsePathfinding = true;
 }
 
 
 void UUtilityIntelligence::TickSkills()
 {
-	FDecisionContext context = GetDecisionContext();
+	// This ticks anything which should be happening WHILE another action happens
+	// For example, this will handle shooting while we run away
+	FDecisionContext startContext = GetDecisionContext();
 	float bestScore = -1.0f;
-	const USkill* best = NULL;
+	FDecisionContext bestContext = startContext;
 	for (const USkillSet* skillSet : SkillSets)
 	{
-		float currentScore = 0.0f;
-		const USkill* skill = skillSet->FindBestSkill(context, currentScore, bestScore);
-		if (currentScore > bestScore)
-		{
-			bestScore = currentScore;
-			best = skill;
-		}
+		skillSet->FindBestSkill(startContext, bestContext, bestScore);
+	}
+
+	if (bestScore <= 0.0f)
+	{
+		// Score too low to make a decision
+		return;
 	}
 
 	// Make the actual decision
-	if (best != NULL)
-	{
-		MakeDecision(best);
-	}
+	MakeDecision(bestContext);
 }
 
 void UUtilityIntelligence::TickDecisions()
 {
-	FDecisionContext context = GetDecisionContext();
+	// This handles strategic planning and long-term decisions
+	// For example, this plans out a good spot to run away to and starts running there
+	FDecisionContext startContext = GetDecisionContext();
 	float bestScore = -1.0f;
-	const UDecisionBase* best = NULL;
+	FDecisionContext bestContext = startContext;
 	for (const UDecisionMaker* decsionMaker : Decisions)
 	{
-		float currentScore = 0.0f;
-		const UDecisionBase* decision = decsionMaker->FindBestDecision(context, currentScore, bestScore);
-		if (currentScore > bestScore)
-		{
-			bestScore = currentScore;
-			best = decision;
-		}
+		// Iterate over every DecisionMaker
+		// These can be added or removed at will, so if the AI enters a tavern
+		// a "tavern" DecisionMaker can be added to the list, allowing for special
+		// tavern behaviors
+		decsionMaker->FindBestDecision(startContext, bestContext, bestScore);
+	}
+
+	if (bestScore <= 0.0f)
+	{
+		// Score too low to make a decision
+		return;
 	}
 
 	// Make the actual decision
-	if (best != NULL)
-	{
-		MakeDecision(best);
-	}
+	MakeDecision(bestContext);
 }
 
-FDecisionContext UUtilityIntelligence::GetDecisionContext() const
+FDecisionContext UUtilityIntelligence::GetDecisionContext()
 {
 	FDecisionContext context;
-	context.OurController = OurController;
+	context.OurIntelligence = this;
 	context.Decision = NULL;
-	context.OurTarget = NULL;
+	context.OurTarget = ContextTarget;
+	context.AIBlackboard = AIBlackboard;
 	return context;
 }
 
@@ -78,14 +92,15 @@ TArray<FMadeDecision> UUtilityIntelligence::GetRecentDecisions_Implementation() 
 	return RecentDecisions;
 }
 
-void UUtilityIntelligence::MakeDecision(const UDecisionBase* Decision)
+void UUtilityIntelligence::MakeDecision(const FDecisionContext& Context)
 {
-	if (Decision == NULL)
+	if (Context.Decision == NULL)
 	{
 		return;
 	}
 
-	RecentDecisions.Add(Decision->RunDecision(OurController));
+	UE_LOG(LogTemp, Log, TEXT("Running decision %s."), *Context.Decision->GetName());
+	RecentDecisions.Add(Context.Decision->RunDecision(Context));
 }
 
 void UUtilityIntelligence::StartAI(AAIController* Controller, UBlackboardComponent* Blackboard)
@@ -102,4 +117,54 @@ void UUtilityIntelligence::StartAI(AAIController* Controller, UBlackboardCompone
 void UUtilityIntelligence::StopAI()
 {
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+}
+
+void UUtilityIntelligence::UpdateContextTarget(AActor* NewTarget)
+{
+	ContextTarget = NewTarget;
+}
+
+void UUtilityIntelligence::AddNewPossibleTarget(APawn* NewTarget)
+{
+	ValidTargets.Add(NewTarget);
+}
+
+void UUtilityIntelligence::RemovePossibleTarget(APawn* Target)
+{
+	ValidTargets.Remove(Target);
+}
+
+TSet<APawn*> UUtilityIntelligence::GetPossibleTargets() const
+{
+	return ValidTargets;
+}
+
+void UUtilityIntelligence::AddNewAlly(APawn* NewAlly)
+{
+	ValidAllies.Add(NewAlly);
+}
+
+void UUtilityIntelligence::RemoveAlly(APawn* Ally)
+{
+	ValidAllies.Remove(Ally);
+}
+
+TSet<APawn*> UUtilityIntelligence::GetAllies() const
+{
+	return ValidAllies;
+}
+
+void UUtilityIntelligence::AddAreaOfInterest(const FVector& InterestingPoint)
+{
+	AreasOfInterest.Add(InterestingPoint);
+}
+
+void UUtilityIntelligence::RemoveAreaOfInterest(const FVector& InterestingPoint)
+{
+	AreasOfInterest.Remove(InterestingPoint);
+}
+
+AAIController* UUtilityIntelligence::GetController() const
+{
+	return OurController;
 }

@@ -3,7 +3,7 @@
 
 #include "Decision.h"
 
-float UDecision::CalculateScore(FDecisionContext Context, float MinToBeat)
+float UDecision::CalculateScore(FDecisionContext& Context, float MinToBeat, float Bonus) const
 {
 	if (DecisionScoreEvaluator == NULL)
 	{
@@ -11,6 +11,6 @@ float UDecision::CalculateScore(FDecisionContext Context, float MinToBeat)
 	}
 	else
 	{
-		return DecisionScoreEvaluator->CalculateScore(Context, MinToBeat);
+		return DecisionScoreEvaluator->CalculateScore(Context, MinToBeat, Bonus);
 	}
 }

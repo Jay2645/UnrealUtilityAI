@@ -11,31 +11,6 @@
 
 #include "Consideration.generated.h"
 
-/*
-* A context that gets passed in giving real-world data about a decision.
-* This passes in the AI making the decision, the decision we're trying
-* to make, as well as the actor we're acting towards.
-*/
-USTRUCT(BlueprintType)
-struct UTILITYAI_API FDecisionContext
-{
-	GENERATED_BODY()
-
-public:
-	// The controller which is generating our considerations.
-	// i.e. "Who is asking?"
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AAIController* OurController;
-	// The actor which we are currently "thinking about."
-	// i.e. "What are you going to do the action to?"
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* OurTarget;
-	// The decision that we'll make if we succeed.
-	// i.e. "What are you trying to do?"
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	const UDecisionBase* Decision;
-};
-
 
 /*
 * A context that checks if we have make a decision recently.

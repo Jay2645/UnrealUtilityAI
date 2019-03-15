@@ -3,6 +3,7 @@
 #include "Consideration.h"
 #include "GameplayTagAssetInterface.h"
 #include "UtilityAIInterface.h"
+#include "UtilityIntelligence.h"
 
 UConsideration::UConsideration()
 {
@@ -12,7 +13,12 @@ UConsideration::UConsideration()
 bool UConsideration::CanScore(const FDecisionContext& Context) const
 {
 	AActor* target = Context.OurTarget;
-	AAIController* us = Context.OurController;
+	UUtilityIntelligence* intelligence = Context.OurIntelligence;
+	if (intelligence == NULL)
+	{
+		return false;
+	}
+	AAIController* us = intelligence->GetController();
 	if (!HasAllRequiredGameplayTags(target, us))
 	{
 		return false;
@@ -95,7 +101,12 @@ bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
 	}
 
 	// Check to see if we inherit the right interface
-	IUtilityAIInterface* ourAI = Cast<IUtilityAIInterface>(Context.OurController);
+	UUtilityIntelligence* intelligence = Context.OurIntelligence;
+	if (intelligence == NULL)
+	{
+		return false;
+	}
+	IUtilityAIInterface* ourAI = Cast<IUtilityAIInterface>(intelligence->GetController());
 	if (ourAI == NULL)
 	{
 #if WITH_EDITOR

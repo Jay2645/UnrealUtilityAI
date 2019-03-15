@@ -33,8 +33,15 @@ class UTILITYAI_API UDecisionMaker : public UPrimaryDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSet<UDecision*> Decisions;
+	// A flat bonus given to this DecisionMaker, allowing for increased
+	// weights for special behaviors associated with it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Bonus;
+
+public:
+	UDecisionMaker();
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Score")
-	UDecision* FindBestDecision(FDecisionContext Context, float& OutBestScore, float MinToBeat = 0.0f) const;
+	UDecision* FindBestDecision(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const;
 };

@@ -70,9 +70,14 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Score|Weight")
 	float GetMomentum(const FDecisionContext& Context) const;
 
+	virtual float CalculateScore_Implementation(FDecisionContext& Context, float MinToBeat, float Bonus) const;
+
 public:
 	// The scoring function for this DSE.
 	// Note that while each Consideration's score might be between 0 and 1, this can be any number.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Score")
-	virtual float CalculateScore(FDecisionContext Context, float MinToBeat, float Bonus = 0.0f) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "AI|Utility AI|Score")
+	float CalculateScore(UPARAM(ref) FDecisionContext& Context, float MinToBeat, float Bonus = 0.0f) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI")
+	static void FindBestContext(TArray<FDecisionContext>& Contexts, const UDecisionScoreEvaluator* Evaluator, FDecisionContext& OutContext, float& OutBestScore);
 };

@@ -2,10 +2,8 @@
 
 #include "SkillSet.h"
 
-USkill* USkillSet::FindBestSkill(FDecisionContext Context, float& OutBestScore, float MinToBeat) const
+USkill* USkillSet::FindBestSkill(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const
 {
-	// Set best score to just below MinToBeat, just so we always lose if we fail
-	OutBestScore = MinToBeat - 0.01f;
 	USkill* best = NULL;
 	for (auto& kvp : Skills)
 	{
@@ -13,14 +11,15 @@ USkill* USkillSet::FindBestSkill(FDecisionContext Context, float& OutBestScore, 
 		USkillDecisionScoreEvaluator* dse = kvp.Value;
 		if (dse != NULL)
 		{
-			Context.Decision = skill;
+			FDecisionContext context = FDecisionContext(StartContext);
+			context.Decision = skill;
 
-			float score = dse->CalculateScore(Context, MinToBeat);
-			if (score > MinToBeat)
+			float score = dse->CalculateScore(context, OutBestScore);
+			if (score > OutBestScore)
 			{
 				best = skill;
-				MinToBeat = score;
 				OutBestScore = score;
+				OutContext = context;
 			}
 		}
 	}

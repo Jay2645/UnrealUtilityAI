@@ -32,5 +32,5 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Score")
-	USkill* FindBestSkill(FDecisionContext Context, float& OutBestScore, float MinToBeat = 0.0f) const;
+	USkill* FindBestSkill(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const;
 };

@@ -2,22 +2,26 @@
 
 #include "DecisionMaker.h"
 
-UDecision* UDecisionMaker::FindBestDecision(FDecisionContext Context, float& OutBestScore, float MinToBeat) const
+UDecisionMaker::UDecisionMaker()
 {
-	// Set best score to just below MinToBeat, just so we always lose if we fail
-	OutBestScore = MinToBeat - 0.01f;
+	Bonus = 0.0f;
+}
+
+UDecision* UDecisionMaker::FindBestDecision(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const
+{
 	UDecision* best = NULL;
 	for (UDecision* decision : Decisions)
 	{
 		if (decision != NULL)
 		{
-			Context.Decision = decision;
-			float score = decision->CalculateScore(Context, MinToBeat);
-			if (score > MinToBeat)
+			FDecisionContext context = FDecisionContext(StartContext);
+			context.Decision = decision;
+			float score = decision->CalculateScore(context, OutBestScore, Bonus);
+			if (score > OutBestScore)
 			{
 				best = decision;
-				MinToBeat = score;
 				OutBestScore = score;
+				OutContext = context;
 			}
 		}
 	}

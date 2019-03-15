@@ -15,9 +15,9 @@ class UTILITYAI_API UDistanceConsideration : public UConsideration
 {
 	GENERATED_BODY()
 
-protected:
-	virtual float Score_Implementation(const FDecisionContext& Context) const override;
-
 public:
 	UDistanceConsideration();
+
+protected:
+	virtual float Score_Implementation(const FDecisionContext& Context) const override;
 };
