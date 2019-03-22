@@ -14,15 +14,15 @@ APawn* UCombatDecision::FindTarget(const FDecisionContext& Context) const
 {
 	UUtilityIntelligence* intelligence = Context.OurIntelligence;
 	TArray<APawn*> targets;
-	if (intelligence == NULL)
+	if (intelligence == nullptr)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	targets = intelligence->GetPossibleTargets().Array();
 	if (targets.Num() == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	TArray<FDecisionContext> contexts = TArray<FDecisionContext>();
@@ -37,10 +37,10 @@ APawn* UCombatDecision::FindTarget(const FDecisionContext& Context) const
 	float bestScore = 0.0f;
 	UDecisionScoreEvaluator::FindBestContext(contexts, FindTargetDSE, bestContext, bestScore);
 	AActor* target = bestContext.OurTarget;
-	if (target == NULL)
+	if (target == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found no target from %d contexts and %d targets!"), contexts.Num(), targets.Num());
-		return NULL;
+		return nullptr;
 	}
 
 	// Inform the intelligence about our target
@@ -50,7 +50,7 @@ APawn* UCombatDecision::FindTarget(const FDecisionContext& Context) const
 
 TEnumAsByte<EBTNodeResult::Type> UCombatDecision::MoveToTarget(const FDecisionContext& Context, APawn* Target) const
 {
-	if (Target == NULL)
+	if (Target == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}

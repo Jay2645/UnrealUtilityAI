@@ -23,7 +23,7 @@ TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::PerformMoveTask(UUtilityInte
 		moveReq.SetProjectGoalLocation(Intelligence->bProjectGoalLocation);
 		moveReq.SetUsePathfinding(Intelligence->bUsePathfinding);
 
-		if (TargetActor != NULL)
+		if (TargetActor != nullptr)
 		{
 			if (Intelligence->bTrackMovingGoal)
 			{
@@ -69,7 +69,7 @@ TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::PerformMoveTask(UUtilityInte
 
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor, FVector MoveLocation)
 {
-	if (Intelligence == NULL)
+	if (Intelligence == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -92,7 +92,7 @@ TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveTo(UUtilityIntelligence*
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveToPoint(UUtilityIntelligence* Intelligence, float MaxDistance, const FVector& Point)
 {
 	FBTMoveToTaskMemory memory = FBTMoveToTaskMemory();
-	return MoveTo(Intelligence, memory, MaxDistance, NULL, Point);
+	return MoveTo(Intelligence, memory, MaxDistance, nullptr, Point);
 }
 
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveToActor(UUtilityIntelligence* Intelligence, float MaxDistance, AActor* Actor)

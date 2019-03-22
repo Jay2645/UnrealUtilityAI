@@ -52,8 +52,14 @@ float UDecisionScoreEvaluator::GetWeight() const
 
 float UDecisionScoreEvaluator::CalculateScore_Implementation(FDecisionContext& Context, float MinToBeat, float Bonus) const
 {
-	float startingBonus = GetWeight() + GetMomentum(Context) + Bonus;
-	float score = startingBonus;
+	float score = GetWeight() + GetMomentum(Context) + Bonus;
+	if (MinToBeat > score)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("Skipping DSE %s because our score of %f (Weight: %f, Momentum: %f, Bonus: %f) doesn't beat %f."), *GetName(), score, GetWeight(), GetMomentum(Context), Bonus, MinToBeat);
+	}
+	float startingBonus = score;
+
+	UE_LOG(LogTemp, Verbose, TEXT("Starting score: %f (Weight: %f, Momentum: %f, Bonus: %f); looking at %d considerations."), score, GetWeight(), GetMomentum(Context), Bonus, Considerations.Num());
 	for (const UConsideration* consideration : Considerations)
 	{
 		score *= FMath::Clamp(consideration->CalculateScore(Context), 0.0f, 1.0f);
@@ -67,14 +73,18 @@ float UDecisionScoreEvaluator::CalculateScore_Implementation(FDecisionContext& C
 
 void UDecisionScoreEvaluator::FindBestContext(TArray<FDecisionContext>& Contexts, const UDecisionScoreEvaluator* Evaluator, FDecisionContext& OutContext, float& OutBestScore)
 {
-	if (Evaluator == NULL)
+	if (Evaluator == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not score contexts as DSE was null!"));
 		return;
 	}
+
+	UE_LOG(LogTemp, Verbose, TEXT("Scoring %d contexts."), Contexts.Num());
 
 	for (FDecisionContext& context : Contexts)
 	{
 		float score = Evaluator->CalculateScore(context, OutBestScore);
+		UE_LOG(LogTemp, Verbose, TEXT("Score: %f"), score);
 		if (score > OutBestScore)
 		{
 			OutBestScore = score;

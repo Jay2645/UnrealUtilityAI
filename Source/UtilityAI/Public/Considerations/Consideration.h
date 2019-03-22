@@ -71,17 +71,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bInvertCooldown;
 
-	// All tags that need to be on the pawn associated with the controller which is
-	// calling the score function for it to consider returning a value.
-	// Skipped if the pawn doesn't implement IGameplayTagAssetInterface.
+	// All tags that need to be on the pawn associated with the controller
+	// calling the score function for this Consideration to return a value.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer OurRequiredTags;
+	// All tags that should NOT be on the pawn associated with the controller
+	// calling the score function for this Consideration to return a value.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer WeMustNotHaveTags;
 
-	// All tags that need to be on the controller calling the score function for it to
-	// consider returning a value.
+	// All tags that need to be on the target Actor for this Consideration
+	// to consider returning a value.
 	// Skipped if the target doesn't implement IGameplayTagAssetInterface.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer TargetRequiredTags;
+	// All tags that should NOT be on the target Actor for this Consideration
+	// to consider returning a value.
+	// Skipped if the target doesn't implement IGameplayTagAssetInterface.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer TargetMustNotHaveTags;
 
 	// We check to see if the pawn has performed any of these decisions within the specified
 	// time period. If we've performed one of these decisions recently, then we skip this
@@ -95,7 +103,7 @@ public:
 private:
 	bool CanScore(const FDecisionContext& Context) const;
 	bool IsInRange(AActor* Target, AAIController* Us) const;
-	bool HasAllRequiredGameplayTags(AActor* target, AAIController* us) const;
+	bool HasAllRequiredGameplayTags(AActor* target, UUtilityIntelligence* us) const;
 	bool CooldownIsValid(const FDecisionContext& Context) const;
 	bool DecisionsAreValid(const FDecisionContext& Context, const TArray<FMadeDecision>& Decisions, float Cooldown, bool bInvert) const;
 

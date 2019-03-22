@@ -13,15 +13,15 @@ UENUM(BlueprintType)
 enum class EEvaluatorPriority : uint8
 {
 	// Emotes, patrolling, etc.
-	Ambient = 0,
+	Ambient = 1,
 	// Chasing after an enemy, taking cover
-	Tactical = 10,
+	Tactical = 4,
 	// Firing a weapon, throwing a grenade
-	Skill = 20,
+	Skill = 16,
 	// Probably should take action soon, we're pretty concerned
-	MinorEmergency = 30,
+	MinorEmergency = 64,
 	// Going to die if we don't take action ASAP
-	MajorEmergency = 40
+	MajorEmergency = 255
 };
 
 /**

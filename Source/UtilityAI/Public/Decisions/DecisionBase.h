@@ -44,10 +44,10 @@ public:
 public:
 	FDecisionContext()
 	{
-		OurIntelligence = NULL;
-		OurTarget = NULL;
-		AIBlackboard = NULL;
-		Decision = NULL;
+		OurIntelligence = nullptr;
+		OurTarget = nullptr;
+		AIBlackboard = nullptr;
+		Decision = nullptr;
 	}
 };
 
@@ -84,10 +84,8 @@ class UTILITYAI_API UDecisionBase : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
-	// A Blackboard containing any kind of static data relevant to
-	// every single time this decision is run, no matter the actor.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	const UBlackboardData* StaticDecisionBlackboard;
+	FGameplayTag TagToApply;
 
 protected:
 	virtual FMadeDecision RunDecision_Implementation(const FDecisionContext& Context) const;

@@ -15,23 +15,23 @@ float UDistanceConsideration::Score_Implementation(const FDecisionContext& Conte
 	{
 		return 0.0f;
 	}
-	if (ResponseCurve == NULL)
+	if (ResponseCurve == nullptr)
 	{
 		return 0.0f;
 	}
 	AActor* target = Context.OurTarget;
 	UUtilityIntelligence* intelligence = Context.OurIntelligence;
-	if (intelligence == NULL)
+	if (intelligence == nullptr)
 	{
 		return 0.0f;
 	}
 	AAIController* us = intelligence->GetController();
-	if (target == NULL || us == NULL)
+	if (target == nullptr || us == nullptr)
 	{
 		return 0.0f;
 	}
 	APawn* ourPawn = us->GetPawn();
-	if (ourPawn == NULL)
+	if (ourPawn == nullptr)
 	{
 		return 0.0f;
 	}

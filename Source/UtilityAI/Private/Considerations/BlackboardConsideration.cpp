@@ -8,7 +8,7 @@ UBlackboardConsideration::UBlackboardConsideration()
 
 float UBlackboardConsideration::Score_Implementation(const FDecisionContext& Context) const
 {
-	if (Context.AIBlackboard != NULL)
+	if (Context.AIBlackboard != nullptr)
 	{
 		return Context.AIBlackboard->GetValueAsFloat(BlackboardKey.SelectedKeyName);
 	}

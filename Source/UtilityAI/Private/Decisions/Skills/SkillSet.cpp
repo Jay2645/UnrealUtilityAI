@@ -4,12 +4,12 @@
 
 USkill* USkillSet::FindBestSkill(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const
 {
-	USkill* best = NULL;
+	USkill* best = nullptr;
 	for (auto& kvp : Skills)
 	{
 		USkill* skill = kvp.Key;
 		USkillDecisionScoreEvaluator* dse = kvp.Value;
-		if (dse != NULL)
+		if (dse != nullptr)
 		{
 			FDecisionContext context = FDecisionContext(StartContext);
 			context.Decision = skill;

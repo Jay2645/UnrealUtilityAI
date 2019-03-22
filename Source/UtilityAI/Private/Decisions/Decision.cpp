@@ -5,7 +5,7 @@
 
 float UDecision::CalculateScore(FDecisionContext& Context, float MinToBeat, float Bonus) const
 {
-	if (DecisionScoreEvaluator == NULL)
+	if (DecisionScoreEvaluator == nullptr)
 	{
 		return 0.0f;
 	}

@@ -11,7 +11,7 @@ UUtilityIntelligence::UUtilityIntelligence()
 	SkillTick = 0.05f;
 	DecisionTick = 0.125f;
 
-	ContextTarget = NULL;
+	ContextTarget = nullptr;
 
 	AcceptableRadius = GET_AI_CONFIG_VAR(AcceptanceRadius);
 	bReachTestIncludesGoalRadius = bReachTestIncludesAgentRadius = GET_AI_CONFIG_VAR(bFinishMoveOnGoalOverlap);
@@ -75,7 +75,7 @@ FDecisionContext UUtilityIntelligence::GetDecisionContext()
 {
 	FDecisionContext context;
 	context.OurIntelligence = this;
-	context.Decision = NULL;
+	context.Decision = nullptr;
 	context.OurTarget = ContextTarget;
 	context.AIBlackboard = AIBlackboard;
 	return context;
@@ -92,14 +92,80 @@ TArray<FMadeDecision> UUtilityIntelligence::GetRecentDecisions_Implementation() 
 	return RecentDecisions;
 }
 
+void UUtilityIntelligence::GetOwnedGameplayTags(FGameplayTagContainer & TagContainer) const
+{
+	if (bPawnHasGameplayTags && OurController != nullptr && OurController->GetPawn() != nullptr)
+	{
+		APawn* pawn = OurController->GetPawn();
+		IGameplayTagAssetInterface* gameplayTagAssetInterface = Cast<IGameplayTagAssetInterface>(pawn);
+		if (gameplayTagAssetInterface != nullptr)
+		{
+			gameplayTagAssetInterface->GetOwnedGameplayTags(TagContainer);
+		}
+	}
+	else
+	{
+		TagContainer = GameplayTags;
+	}
+}
+
+void UUtilityIntelligence::RemoveGameplayTag(const FGameplayTag& TagToRemove)
+{
+	if (!TagToRemove.IsValid())
+	{
+		return;
+	}
+	FGameplayTagContainer& container = GameplayTags;
+	if (bPawnHasGameplayTags && OurController != nullptr && OurController->GetPawn() != nullptr)
+	{
+		APawn* pawn = OurController->GetPawn();
+		IGameplayTagAssetInterface* gameplayTagAssetInterface = Cast<IGameplayTagAssetInterface>(pawn);
+		if (gameplayTagAssetInterface != nullptr)
+		{
+			gameplayTagAssetInterface->GetOwnedGameplayTags(container);
+		}
+		else
+		{
+			// Pawn no longer has GameplayTags
+			bPawnHasGameplayTags = false;
+		}
+	}
+	container.RemoveTag(TagToRemove);
+}
+
+void UUtilityIntelligence::AddGameplayTag(const FGameplayTag& TagToAdd)
+{
+	if (!TagToAdd.IsValid())
+	{
+		return;
+	}
+	FGameplayTagContainer& container = GameplayTags;
+	if (bPawnHasGameplayTags && OurController != nullptr && OurController->GetPawn() != nullptr)
+	{
+		APawn* pawn = OurController->GetPawn();
+		IGameplayTagAssetInterface* gameplayTagAssetInterface = Cast<IGameplayTagAssetInterface>(pawn);
+		if (gameplayTagAssetInterface != nullptr)
+		{
+			gameplayTagAssetInterface->GetOwnedGameplayTags(container);
+		}
+		else
+		{
+			// Pawn no longer has GameplayTags
+			bPawnHasGameplayTags = false;
+		}
+	}
+	container.AddTag(TagToAdd);
+}
+
 void UUtilityIntelligence::MakeDecision(const FDecisionContext& Context)
 {
-	if (Context.Decision == NULL)
+	if (Context.Decision == nullptr)
 	{
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Running decision %s."), *Context.Decision->GetName());
+	AddGameplayTag(Context.Decision->TagToApply);
+
 	RecentDecisions.Add(Context.Decision->RunDecision(Context));
 }
 
@@ -107,6 +173,17 @@ void UUtilityIntelligence::StartAI(AAIController* Controller, UBlackboardCompone
 {
 	OurController = Controller;
 	AIBlackboard = Blackboard;
+
+	if (OurController != nullptr && OurController->GetPawn() != nullptr)
+	{
+		APawn* pawn = OurController->GetPawn();
+		IGameplayTagAssetInterface* gameplayTagAssetInterface = Cast<IGameplayTagAssetInterface>(pawn);
+		bPawnHasGameplayTags = gameplayTagAssetInterface != nullptr;
+	}
+	else
+	{
+		bPawnHasGameplayTags = false;
+	}
 
 	FTimerManager& worldManager = GetWorld()->GetTimerManager();
 	worldManager.SetTimer(DecisionTickTimer, this, &UUtilityIntelligence::TickDecisions, DecisionTick, true, 0.0f);

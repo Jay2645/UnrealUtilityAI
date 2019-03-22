@@ -12,14 +12,14 @@ UEnemyConsideration::UEnemyConsideration()
 
 float UEnemyConsideration::Score_Implementation(const FDecisionContext & Context) const
 {
-	if (ResponseCurve == NULL)
+	if (ResponseCurve == nullptr || MaxEnemies == 0)
 	{
 		return 0.0f;
 	}
 	else
 	{
 		UUtilityIntelligence* intelligence = Context.OurIntelligence;
-		if (intelligence == NULL)
+		if (intelligence == nullptr)
 		{
 			return 0.0f;
 		}

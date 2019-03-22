@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "NavFilters/NavigationQueryFilter.h"
+#include "GameplayTagAssetInterface.h"
 
 #include "UtilityAIInterface.h"
 #include "SkillSet.h"
@@ -14,7 +15,7 @@
 
 
 UCLASS(Blueprintable, meta=(BlueprintSpawnableComponent))
-class UTILITYAI_API UUtilityIntelligence : public UActorComponent, public IUtilityAIInterface
+class UTILITYAI_API UUtilityIntelligence : public UActorComponent, public IUtilityAIInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -29,6 +30,11 @@ private:
 
 	UPROPERTY(Transient)
 	AActor* ContextTarget;
+
+	UPROPERTY(Transient)
+	bool bPawnHasGameplayTags;
+	UPROPERTY(Transient)
+	FGameplayTagContainer GameplayTags;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
@@ -97,6 +103,12 @@ protected:
 	virtual TArray<FMadeDecision> GetRecentDecisions_Implementation() const override;
 
 public:
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
+	UFUNCTION(BlueprintCallable, Category = "GameplayTags")
+	virtual void RemoveGameplayTag(const FGameplayTag& TagToRemove);
+	UFUNCTION(BlueprintCallable, Category = "GameplayTags")
+	virtual void AddGameplayTag(const FGameplayTag& TagToAdd);
+
 	UFUNCTION(BlueprintCallable, Category = "AI|Utility AI|Intelligence")
 	void MakeDecision(const FDecisionContext& Context);
 

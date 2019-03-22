@@ -21,7 +21,7 @@ class UTILITYAI_API UUtilityAIHelpers : public UBlueprintFunctionLibrary
 
 private:
 	static TEnumAsByte<EBTNodeResult::Type> PerformMoveTask(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* TargetActor, const FVector& TargetLocation);
-	static TEnumAsByte<EBTNodeResult::Type> MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor = NULL, FVector MoveLocation = FVector(FLT_MAX));
+	static TEnumAsByte<EBTNodeResult::Type> MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor = nullptr, FVector MoveLocation = FVector(FLT_MAX));
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AI")

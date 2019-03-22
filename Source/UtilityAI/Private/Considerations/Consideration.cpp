@@ -14,16 +14,16 @@ bool UConsideration::CanScore(const FDecisionContext& Context) const
 {
 	AActor* target = Context.OurTarget;
 	UUtilityIntelligence* intelligence = Context.OurIntelligence;
-	if (intelligence == NULL)
+	if (intelligence == nullptr)
 	{
 		return false;
 	}
-	AAIController* us = intelligence->GetController();
-	if (!HasAllRequiredGameplayTags(target, us))
+	if (!HasAllRequiredGameplayTags(target, intelligence))
 	{
 		return false;
 	}
 
+	AAIController* us = intelligence->GetController();
 	if (!IsInRange(target, us))
 	{
 		return false;
@@ -40,13 +40,13 @@ bool UConsideration::IsInRange(AActor* Target, AAIController* Us) const
 		return true;
 	}
 
-	if (Target == NULL || Us == NULL)
+	if (Target == nullptr || Us == nullptr)
 	{
 		return false;
 	}
 
 	APawn* ourPawn = Us->GetPawn();
-	if (ourPawn == NULL)
+	if (ourPawn == nullptr)
 	{
 		return false;
 	}
@@ -56,20 +56,29 @@ bool UConsideration::IsInRange(AActor* Target, AAIController* Us) const
 	return FVector::DistSquared(targetLocation, ourLocation) <= Radius * Radius;
 }
 
-bool UConsideration::HasAllRequiredGameplayTags(AActor* Target, AAIController* Us) const
+bool UConsideration::HasAllRequiredGameplayTags(AActor* Target, UUtilityIntelligence* Us) const
 {
-	if (Target == NULL || Us == NULL)
+	if (Target == nullptr || Us == nullptr)
 	{
 		return false;
 	}
 
 	// Target gameplay tags
-	if (TargetRequiredTags.Num() > 0)
+	IGameplayTagAssetInterface* targetInterface = Cast<IGameplayTagAssetInterface>(Target);
+	if (targetInterface != nullptr)
 	{
-		IGameplayTagAssetInterface* targetInterface = Cast<IGameplayTagAssetInterface>(Target);
-		if (targetInterface != NULL)
+		// Must have all the tags
+		if (TargetRequiredTags.Num() > 0)
 		{
 			if (!targetInterface->HasAllMatchingGameplayTags(TargetRequiredTags))
+			{
+				return false;
+			}
+		}
+		// Can't have any of the tags
+		if (TargetMustNotHaveTags.Num() > 0)
+		{
+			if (targetInterface->HasAnyMatchingGameplayTags(TargetMustNotHaveTags))
 			{
 				return false;
 			}
@@ -79,13 +88,16 @@ bool UConsideration::HasAllRequiredGameplayTags(AActor* Target, AAIController* U
 	// Our gameplay tags
 	if (OurRequiredTags.Num() > 0)
 	{
-		IGameplayTagAssetInterface* ourInterface = Cast<IGameplayTagAssetInterface>(Us->GetPawn());
-		if (ourInterface != NULL)
+		if (!Us->HasAllMatchingGameplayTags(OurRequiredTags))
 		{
-			if (!ourInterface->HasAllMatchingGameplayTags(OurRequiredTags))
-			{
-				return false;
-			}
+			return false;
+		}
+	}
+	if (WeMustNotHaveTags.Num() > 0)
+	{
+		if (Us->HasAnyMatchingGameplayTags(WeMustNotHaveTags))
+		{
+			return false;
 		}
 	}
 
@@ -102,12 +114,12 @@ bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
 
 	// Check to see if we inherit the right interface
 	UUtilityIntelligence* intelligence = Context.OurIntelligence;
-	if (intelligence == NULL)
+	if (intelligence == nullptr)
 	{
 		return false;
 	}
 	IUtilityAIInterface* ourAI = Cast<IUtilityAIInterface>(intelligence->GetController());
-	if (ourAI == NULL)
+	if (ourAI == nullptr)
 	{
 #if WITH_EDITOR
 		UE_LOG(LogTemp, Warning, TEXT("You can only \"properly\" use Utility AI if your Controller inherits UtilityAIInterface"));

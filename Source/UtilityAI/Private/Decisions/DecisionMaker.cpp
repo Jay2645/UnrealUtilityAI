@@ -9,10 +9,10 @@ UDecisionMaker::UDecisionMaker()
 
 UDecision* UDecisionMaker::FindBestDecision(const FDecisionContext& StartContext, FDecisionContext& OutContext, float& OutBestScore) const
 {
-	UDecision* best = NULL;
+	UDecision* best = nullptr;
 	for (UDecision* decision : Decisions)
 	{
-		if (decision != NULL)
+		if (decision != nullptr)
 		{
 			FDecisionContext context = FDecisionContext(StartContext);
 			context.Decision = decision;
