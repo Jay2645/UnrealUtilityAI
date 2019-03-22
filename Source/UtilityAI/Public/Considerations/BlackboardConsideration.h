@@ -19,7 +19,7 @@ class UTILITYAI_API UBlackboardConsideration : public UConsideration
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
-	FBlackboardKeySelector BlackboardKey;
+	FName BlackboardKey;
 
 public:
 	UBlackboardConsideration();

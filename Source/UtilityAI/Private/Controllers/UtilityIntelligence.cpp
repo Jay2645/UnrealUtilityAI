@@ -3,6 +3,7 @@
 
 #include "UtilityIntelligence.h"
 #include "AISystem.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UUtilityIntelligence::UUtilityIntelligence()
@@ -90,6 +91,18 @@ void UUtilityIntelligence::EndPlay(EEndPlayReason::Type EndPlayReason)
 TArray<FMadeDecision> UUtilityIntelligence::GetRecentDecisions_Implementation() const
 {
 	return RecentDecisions;
+}
+
+void UUtilityIntelligence::OnTargetDestroyed(AActor* Target)
+{
+	APawn* pawn = Cast<APawn>(Target);
+	if (pawn == nullptr)
+	{
+		return;
+	}
+	// Only one of these will be successful, assuming the actor is in one of the lists
+	RemoveAlly(pawn);
+	RemovePossibleTarget(pawn);
 }
 
 void UUtilityIntelligence::GetOwnedGameplayTags(FGameplayTagContainer & TagContainer) const
@@ -203,11 +216,20 @@ void UUtilityIntelligence::UpdateContextTarget(AActor* NewTarget)
 
 void UUtilityIntelligence::AddNewPossibleTarget(APawn* NewTarget)
 {
+	if (NewTarget == nullptr)
+	{
+		return;
+	}
 	ValidTargets.Add(NewTarget);
+	NewTarget->OnDestroyed.AddDynamic(this, &UUtilityIntelligence::OnTargetDestroyed);
 }
 
 void UUtilityIntelligence::RemovePossibleTarget(APawn* Target)
 {
+	if (Target == nullptr)
+	{
+		return;
+	}
 	ValidTargets.Remove(Target);
 }
 
@@ -218,11 +240,20 @@ TSet<APawn*> UUtilityIntelligence::GetPossibleTargets() const
 
 void UUtilityIntelligence::AddNewAlly(APawn* NewAlly)
 {
+	if (NewAlly == nullptr)
+	{
+		return;
+	}
 	ValidAllies.Add(NewAlly);
+	NewAlly->OnDestroyed.AddDynamic(this, &UUtilityIntelligence::OnTargetDestroyed);
 }
 
 void UUtilityIntelligence::RemoveAlly(APawn* Ally)
 {
+	if (Ally == nullptr)
+	{
+		return;
+	}
 	ValidAllies.Remove(Ally);
 }
 

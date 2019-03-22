@@ -102,6 +102,9 @@ protected:
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual TArray<FMadeDecision> GetRecentDecisions_Implementation() const override;
 
+	UFUNCTION()
+	virtual void OnTargetDestroyed(AActor* Target);
+
 public:
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
 	UFUNCTION(BlueprintCallable, Category = "GameplayTags")

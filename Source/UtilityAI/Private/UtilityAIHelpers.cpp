@@ -5,6 +5,7 @@
 #include "AITypes.h"
 #include "NavFilters/NavigationQueryFilter.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "AISystem.h"
 
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::PerformMoveTask(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* TargetActor, const FVector& TargetLocation)
 {
@@ -87,6 +88,62 @@ TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveTo(UUtilityIntelligence*
 	}
 
 	return nodeResult;
+}
+
+UUtilityEnvQueryInstance* UUtilityAIHelpers::RunEQSQuery(const FDecisionContext& Context, TEnumAsByte<EEnvQueryRunMode::Type> RunMode, FEnvQueryRequest& Query, UUtilityEnvQueryInstance* Wrapper)
+{
+	if (Context.OurIntelligence == nullptr)
+	{
+		return nullptr;
+	}
+	AAIController* controller = Context.OurIntelligence->GetController();
+	if (controller == nullptr)
+	{
+		return nullptr;
+	}
+	APawn* pawn = controller->GetPawn();
+	if (pawn == nullptr)
+	{
+		return nullptr;
+	}
+
+	// Create the wrapper if it doesn't already exist
+	if (Wrapper == nullptr)
+	{
+		// The wrapper needs to be attached to the EQS manager
+		UAISystem* aiSys = UAISystem::GetCurrentSafe(pawn->GetWorld());
+		if (aiSys == nullptr)
+		{
+			return nullptr;
+		}
+		UEnvQueryManager* eqsManager = aiSys->GetEnvironmentQueryManager();
+		if (eqsManager == nullptr)
+		{
+			return nullptr;
+		}
+		Wrapper = NewObject<UUtilityEnvQueryInstance>(eqsManager, UUtilityEnvQueryInstance::StaticClass());
+		// Verify it initialized correctly
+		if (Wrapper == nullptr)
+		{
+			return nullptr;
+		}
+	}
+
+	// Run the query
+	Wrapper->SetInstigator(pawn);
+	Wrapper->RunQuery(RunMode, Query);
+	return Wrapper;
+}
+
+UUtilityEnvQueryInstance* UUtilityAIHelpers::RunEQSQueryFromTemplate(const FDecisionContext& Context, TEnumAsByte<EEnvQueryRunMode::Type> RunMode, UEnvQuery* QueryTemplate, UUtilityEnvQueryInstance* Wrapper)
+{
+	if (QueryTemplate == nullptr)
+	{
+		return nullptr;
+	}
+	// Create a request and run the query
+	FEnvQueryRequest request = FEnvQueryRequest(QueryTemplate);
+	return RunEQSQuery(Context, RunMode, request, Wrapper);
 }
 
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveToPoint(UUtilityIntelligence* Intelligence, float MaxDistance, const FVector& Point)

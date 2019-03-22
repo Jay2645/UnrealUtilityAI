@@ -36,7 +36,7 @@ Generally, you should create custom:
 
 * `Skills`, which implement any behaviors you want your AI to have (shooting, for example).
 
-You can also create custom `DecisionScoreEvaluators` if you wanted to play with the concept of "momentum" -- making a decision more or less likely to be chosen if it was chosen recently. However, `Considerations` and `DecisionScoreEvaluators` shouldn't implement any gameplay behavior -- save those for your `Decisions` and `Skills`.
+You can also create custom `DecisionScoreEvaluators` if you wanted to play with the concept of "momentum" -- making a decision more or less likely to be chosen if it was chosen recently. However, `Considerations` and `DecisionScoreEvaluators` shouldn't implement any gameplay behavior -- save those for your `Decisions` and `Skills`. They can potentially cache something to a Blackboard (for example, an EQS lookup), but they shouldn't actively cause your AI to take any action; they should only provide a score.
 
 ## Dynamic Behaviors
 

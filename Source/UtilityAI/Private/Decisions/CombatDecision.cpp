@@ -29,6 +29,13 @@ APawn* UCombatDecision::FindTarget(const FDecisionContext& Context) const
 	contexts.SetNum(targets.Num());
 	for (int i = 0; i < targets.Num(); i++)
 	{
+#if !UE_BUILD_SHIPPING
+		if (targets[i] == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Detected a null target!"));
+			return nullptr;
+		}
+#endif
 		contexts[i] = FDecisionContext(Context);
 		contexts[i].OurTarget = targets[i];
 	}
