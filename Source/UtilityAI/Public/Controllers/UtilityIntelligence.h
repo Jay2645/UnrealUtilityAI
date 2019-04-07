@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "EQSConsideration.h"
 #include "NavFilters/NavigationQueryFilter.h"
 #include "GameplayTagAssetInterface.h"
 
 #include "UtilityAIInterface.h"
 #include "SkillSet.h"
 #include "DecisionMaker.h"
+#include "UtilityEnvQueryInstance.h"
+#include "DecisionBase.h"
 
 #include "UtilityIntelligence.generated.h"
 
@@ -26,9 +29,6 @@ private:
 	FTimerHandle DecisionTickTimer;
 
 	UPROPERTY(Transient)
-	UBlackboardComponent* AIBlackboard;
-
-	UPROPERTY(Transient)
 	AActor* ContextTarget;
 
 	UPROPERTY(Transient)
@@ -37,21 +37,38 @@ private:
 	FGameplayTagContainer GameplayTags;
 
 protected:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<FMadeDecision> RecentDecisions;
-	UPROPERTY(BlueprintReadOnly)
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
 	AAIController* OurController;
+	
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UBlackboardComponent* AIBlackboard;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Decisions")
 	float SkillTick;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Decisions")
 	float DecisionTick;
 
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Transient, EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
 	TSet<APawn*> ValidTargets;
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Transient, EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
 	TSet<APawn*> ValidAllies;
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Transient, EditInstanceOnly, meta = (AllowPrivateAccess = "true"))
 	TSet<FVector> AreasOfInterest;
+
+	// Since Decisions and Considerations are stored on disk, they can't be modified
+	// on an instance-by-instance basis without some serious side effects (notably,
+	// the loss of the ability to store "presets" on the disk).
+	// However, the EQS system needs an instance of an environmental query to modify.
+	// A compromise is to store the EQS instance on the INTELLIGENCE, with a map to
+	// the Decision/Consideration using the EQS. That way, the EQS can be modified
+	// and the system can easily look up which intelligence is "supposed" to handle
+	// the data without modifying anything on the disk.
+	UPROPERTY(Transient)
+	TMap<const UDecisionBase*, UUtilityEnvQueryInstance*> DecisionEQSHelpers;
+	UPROPERTY(Transient)
+	TMap<const UEQSConsideration*, UUtilityEnvQueryInstance*> ConsiderationEQSHelpers;
 
 public:
 	// Fixed distance added to threshold between AI and goal location in destination reach test
@@ -87,7 +104,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decisions")
 	TSet<const UDecisionMaker*> Decisions;
 
-public:	
+public:
 	UUtilityIntelligence();
 
 private:
@@ -146,4 +163,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Intelligence")
 	AAIController* GetController() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AI|Utility AI|Intelligence")
+	APawn* GetPawn() const;
+
+	
+	UUtilityEnvQueryInstance* GetDecisonEQS(const UDecisionBase* Decision);
+	UUtilityEnvQueryInstance* RunDecisonEQS(const UDecisionBase* Decision, const FDecisionContext& Context, TEnumAsByte<EEnvQueryRunMode::Type> RunMode, UEnvQuery* QueryTemplate);
+	
+	UUtilityEnvQueryInstance* GetConsiderationEQS(const UEQSConsideration* Consideration);
+	UUtilityEnvQueryInstance* RunConsiderationEQS(const UEQSConsideration* Consideration, const FDecisionContext& Context, TEnumAsByte<EEnvQueryRunMode::Type> RunMode, UEnvQuery* QueryTemplate);
 };

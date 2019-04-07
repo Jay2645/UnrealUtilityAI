@@ -70,7 +70,8 @@ TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::PerformMoveTask(UUtilityInte
 
 TEnumAsByte<EBTNodeResult::Type> UUtilityAIHelpers::MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor, FVector MoveLocation)
 {
-	if (Intelligence == nullptr)
+	// Fail if we don't have a valid intelligence or if we don't have anywhere to move to
+	if (Intelligence == nullptr || MoveActor == nullptr && MoveLocation == INVALID_LOCATION)
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -96,12 +97,7 @@ UUtilityEnvQueryInstance* UUtilityAIHelpers::RunEQSQuery(const FDecisionContext&
 	{
 		return nullptr;
 	}
-	AAIController* controller = Context.OurIntelligence->GetController();
-	if (controller == nullptr)
-	{
-		return nullptr;
-	}
-	APawn* pawn = controller->GetPawn();
+	APawn* pawn = Context.OurIntelligence->GetPawn();
 	if (pawn == nullptr)
 	{
 		return nullptr;
@@ -142,7 +138,7 @@ UUtilityEnvQueryInstance* UUtilityAIHelpers::RunEQSQueryFromTemplate(const FDeci
 		return nullptr;
 	}
 	// Create a request and run the query
-	FEnvQueryRequest request = FEnvQueryRequest(QueryTemplate);
+	FEnvQueryRequest request = FEnvQueryRequest(QueryTemplate, Context.OurIntelligence->GetPawn());
 	return RunEQSQuery(Context, RunMode, request, Wrapper);
 }
 

@@ -10,24 +10,30 @@ UEQSConsideration::UEQSConsideration()
 
 float UEQSConsideration::Score_Implementation(const FDecisionContext& Context) const
 {
+	if (Context.OurIntelligence == nullptr)
+	{
+		return 0.0f;
+	}
+
+	UUtilityEnvQueryInstance* envQueryWrapper = Context.OurIntelligence->GetConsiderationEQS(this);
 	float score = 0.0f;
 	// See if we have a cached version that we've scored already
 	// We do this before creating the query because the call is async and we want to try
 	// and get the values from the query we already have before resetting it with a new one.
-	if (EnvQueryWrapper != nullptr)
+	if (envQueryWrapper != nullptr)
 	{
 		// Query is done, check the score
 		// This will be the score from the previous iteration if the EQS hasn't completed yet
-		score = EnvQueryWrapper->GetBestScore();
-		if (EnvQueryWrapper->IsFinished())
+		score = envQueryWrapper->GetBestScore();
+		if (envQueryWrapper->IsFinished())
 		{
 			// If we have a blackboard key and a valid score, cache the results in the blackboard
 			if (score > 0.0f && !BlackboardCacheKey.IsNone())
 			{
-				AActor* bestActor = EnvQueryWrapper->GetBestActor();
+				AActor* bestActor = envQueryWrapper->GetBestActor();
 				if (bestActor == nullptr)
 				{
-					FVector bestLocation = EnvQueryWrapper->GetBestVector();
+					FVector bestLocation = envQueryWrapper->GetBestVector();
 					if (bestLocation != FAISystem::InvalidLocation)
 					{
 						Context.AIBlackboard->SetValueAsVector(BlackboardCacheKey, bestLocation);
@@ -47,6 +53,6 @@ float UEQSConsideration::Score_Implementation(const FDecisionContext& Context) c
 	}
 
 	// Make a new query
-	EnvQueryWrapper = UUtilityAIHelpers::RunEQSQueryFromTemplate(Context, RunMode, QueryTemplate, EnvQueryWrapper);
+	Context.OurIntelligence->RunConsiderationEQS(this, Context, RunMode, QueryTemplate);
 	return score;
 }

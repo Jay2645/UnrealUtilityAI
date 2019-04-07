@@ -122,8 +122,8 @@ bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
 	if (ourAI == nullptr)
 	{
 #if WITH_EDITOR
-		UE_LOG(LogTemp, Warning, TEXT("You can only \"properly\" use Utility AI if your Controller inherits UtilityAIInterface"));
-		UE_LOG(LogTemp, Warning, TEXT("Make sure to add it as a valid interface to get everything working correctly!"));
+		UE_LOG(LogUtilityAI, Warning, TEXT("You can only \"properly\" use Utility AI if your Controller inherits UtilityAIInterface"));
+		UE_LOG(LogUtilityAI, Warning, TEXT("Make sure to add it as a valid interface to get everything working correctly!"));
 #endif
 		return false;
 	}
@@ -134,8 +134,8 @@ bool UConsideration::CooldownIsValid(const FDecisionContext& Context) const
 	{
 		if (decisions[1].DecisionTime < decisions[0].DecisionTime)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Decisions are being added in the wrong order!"));
-			UE_LOG(LogTemp, Error, TEXT("Make sure that decisions made later get placed at the end of the array."));
+			UE_LOG(LogUtilityAI, Error, TEXT("Decisions are being added in the wrong order!"));
+			UE_LOG(LogUtilityAI, Error, TEXT("Make sure that decisions made later get placed at the end of the array."));
 		}
 	}
 #endif

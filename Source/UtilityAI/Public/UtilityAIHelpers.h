@@ -14,6 +14,8 @@
 
 #include "UtilityAIHelpers.generated.h"
 
+#define INVALID_LOCATION FVector(FLT_MAX)
+
 /**
  * A collection of helpers for the utility AI.
  */
@@ -24,7 +26,7 @@ class UTILITYAI_API UUtilityAIHelpers : public UBlueprintFunctionLibrary
 
 private:
 	static TEnumAsByte<EBTNodeResult::Type> PerformMoveTask(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* TargetActor, const FVector& TargetLocation);
-	static TEnumAsByte<EBTNodeResult::Type> MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor = nullptr, FVector MoveLocation = FVector(FLT_MAX));
+	static TEnumAsByte<EBTNodeResult::Type> MoveTo(UUtilityIntelligence* Intelligence, FBTMoveToTaskMemory& OutMemory, float MaxDistance, AActor* MoveActor = nullptr, FVector MoveLocation = INVALID_LOCATION);
 	static UUtilityEnvQueryInstance* RunEQSQuery(const FDecisionContext& Context, TEnumAsByte<EEnvQueryRunMode::Type> RunMode, FEnvQueryRequest& Query, UUtilityEnvQueryInstance* Wrapper = nullptr);
 public:
 	// Runs a given EQS query. Assumes that the query is already ready to go.

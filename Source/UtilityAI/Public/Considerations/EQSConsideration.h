@@ -18,10 +18,6 @@ UCLASS()
 class UTILITYAI_API UEQSConsideration : public UConsideration
 {
 	GENERATED_BODY()
-protected:
-	UPROPERTY(BlueprintReadWrite)
-	mutable UUtilityEnvQueryInstance* EnvQueryWrapper;
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
 	FName BlackboardCacheKey;

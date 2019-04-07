@@ -8,6 +8,8 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTreeTypes.h"
 
+#include "UtilityAI.h"
+
 #include "DecisionBase.generated.h"
 
 class UDecisionBase;
